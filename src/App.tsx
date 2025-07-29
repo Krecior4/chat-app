@@ -1,6 +1,34 @@
+import { useEffect, useState } from 'react'
+import supabase from './utilities/supabase'
 import './App.css'
+import { v4 as uuid } from 'uuid'
 
 function App() {
+  const [textInput, setTextInput] = useState<string>("")
+  const [userId, setUserId] = useState<string>("")
+
+  useEffect(() => {
+    const id = localStorage.getItem('userId')
+    if (!id) {
+      const userGeneratedId: string = uuid()
+      localStorage.setItem('userId', userGeneratedId)
+      setUserId(userGeneratedId)
+    }
+
+    setUserId(String(id))
+  }, [])
+
+  async function sendMessage() {
+    await supabase
+    .from('messages')
+    .insert({
+        author: userId,
+        content: textInput
+      })
+    .select()
+
+    setTextInput("")
+  }
 
   return (
     <>
@@ -13,8 +41,8 @@ function App() {
           <p className="content">Lorem ipsum dolor sit amet consectetur, adipisicing elit. Cumque, eaque.</p>
         </div>
         <div className="chatInput">
-          <input type="text" name="textInput" id="textInput" />
-          <button>Send</button>
+          <input type="text" name="textInput" id="textInput" onChange={(e) => {setTextInput(e.target.value)}} value={textInput} />
+          <button onClick={sendMessage}>Send</button>
         </div>
       </div>
     </>
